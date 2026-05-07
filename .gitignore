@@ -1,0 +1,16 @@
+# OS / editor junk
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.vscode/
+.idea/
+
+# Windows zone identifiers
+*:Zone.Identifier
+
+# Env / secrets
+.env
+.env.*
+*.key
+*.pem
