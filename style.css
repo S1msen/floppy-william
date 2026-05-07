@@ -1,5 +1,9 @@
 * { box-sizing: border-box; }
 
+html, body {
+  height: 100%;
+}
+
 body {
   margin: 0;
   font-family: "Comic Sans MS", "Trebuchet MS", system-ui, sans-serif;
@@ -7,11 +11,22 @@ body {
   background-size: 400% 400%;
   animation: bgshift 12s ease infinite;
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 16px;
+  padding: 12px;
+  padding-top: max(12px, env(safe-area-inset-top));
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  padding-left: max(12px, env(safe-area-inset-left));
+  padding-right: max(12px, env(safe-area-inset-right));
   color: #2b1055;
+  overflow: hidden;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
 }
 
 @keyframes bgshift {
@@ -20,9 +35,13 @@ body {
   100% { background-position: 0% 50%; }
 }
 
+header {
+  flex: 0 0 auto;
+}
+
 header h1 {
-  margin: 8px 0 14px;
-  font-size: 32px;
+  margin: 4px 0 8px;
+  font-size: clamp(18px, 4.5vw, 32px);
   text-align: center;
   text-shadow:
     0 0 8px #fff,
@@ -36,30 +55,52 @@ header h1 {
   to   { transform: scale(1.05) rotate(1deg); }
 }
 
+/*
+ * #gameWrap fills the available space while preserving the
+ * canvas's native 3:4 (480x640) aspect ratio. This is what makes
+ * it scale correctly on iPhone Safari in both portrait and landscape.
+ */
 #gameWrap {
   position: relative;
-  width: 480px;
-  max-width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  max-width: 480px;
+  aspect-ratio: 3 / 4;
+  /* Fallback: if aspect-ratio isn't supported, cap by viewport height */
+  max-height: 100%;
+  margin: 0 auto;
+}
+
+/* If the wrap would be taller than tall enough to exceed viewport,
+   cap its width so height fits. Modern browsers handle this with
+   aspect-ratio + max-height, but we add a safety constraint. */
+@supports not (aspect-ratio: 3 / 4) {
+  #gameWrap {
+    height: 100%;
+    width: auto;
+  }
 }
 
 canvas {
   display: block;
   width: 100%;
-  height: auto;
-  border: 6px solid #ff4fa3;
+  height: 100%;
+  border: 4px solid #ff4fa3;
   border-radius: 14px;
   box-shadow: 0 10px 40px rgba(0,0,0,0.35), 0 0 0 4px #ffd84f inset;
   background: #87ceeb;
+  touch-action: manipulation;
 }
 
 #hud {
   position: absolute;
-  top: 12px;
-  left: 14px;
-  right: 14px;
+  top: 10px;
+  left: 12px;
+  right: 12px;
   display: flex;
   justify-content: space-between;
-  font-size: 20px;
+  font-size: clamp(14px, 3.2vw, 20px);
   color: #fff;
   text-shadow: 2px 2px 0 #2b1055;
   pointer-events: none;
@@ -82,7 +123,7 @@ canvas {
   background: #fff;
   border: 4px solid #ff4fa3;
   border-radius: 16px;
-  padding: 24px 28px;
+  padding: clamp(14px, 3vw, 24px) clamp(16px, 4vw, 28px);
   text-align: center;
   box-shadow: 0 10px 30px rgba(0,0,0,0.4);
   max-width: 80%;
@@ -91,17 +132,20 @@ canvas {
 #overlayInner h2 {
   margin: 0 0 8px;
   color: #ff4fa3;
-  font-size: 28px;
+  font-size: clamp(20px, 5vw, 28px);
 }
 
-#overlayInner p { margin: 0 0 16px; font-size: 16px; }
+#overlayInner p {
+  margin: 0 0 16px;
+  font-size: clamp(13px, 3.4vw, 16px);
+}
 
 #startBtn {
   background: #ff4fa3;
   color: #fff;
   border: none;
   padding: 10px 24px;
-  font-size: 18px;
+  font-size: clamp(15px, 3.8vw, 18px);
   border-radius: 999px;
   cursor: pointer;
   font-family: inherit;
@@ -113,11 +157,27 @@ canvas {
 #startBtn:active { transform: translateY(2px); box-shadow: 0 1px 0 #b3266f; }
 
 .hint {
-  margin-top: 12px;
+  flex: 0 0 auto;
+  margin-top: 8px;
+  margin-bottom: 0;
   color: #2b1055;
-  font-size: 14px;
+  font-size: clamp(11px, 2.8vw, 14px);
   text-align: center;
   background: rgba(255,255,255,0.6);
-  padding: 6px 14px;
+  padding: 5px 12px;
   border-radius: 999px;
+}
+
+/* Landscape on phones: hide bulky title, give canvas all the room */
+@media (max-height: 500px) and (orientation: landscape) {
+  body { padding: 6px; }
+  header { display: none; }
+  .hint { display: none; }
+  #gameWrap { max-width: none; height: 100%; width: auto; }
+}
+
+/* Very small screens: tighten everything */
+@media (max-width: 380px) {
+  body { padding: 8px; }
+  header h1 { margin: 2px 0 6px; }
 }
